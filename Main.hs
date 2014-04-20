@@ -6,7 +6,10 @@ import Prelude
 import qualified Data.Configurator as Conf
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import qualified Data.Text.IO as TI
+import qualified Data.MarkovChain as MC
 
+import System.Random (RandomGen, getStdGen)
 import System.Environment (getArgs)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Catch (MonadThrow)
@@ -25,8 +28,12 @@ main = do
     conf <- Conf.load [Conf.Required confFile]
     oauth <- makeOAuth conf
     cred <- makeCredential conf
+    rnd <- getStdGen
 
-    postTweet oauth cred "Hello, Horse"
+    input <- TI.getLine
+    let tweet = generateTweet rnd (T.unpack input)
+    putStrLn tweet
+    -- postTweet oauth cred "Hello, Horse"
 
     where
         makeOAuth conf = do
@@ -42,21 +49,25 @@ main = do
             return $ newCredential token secret
 
 
-postTweet :: OAuth -> Credential -> T.Text -> IO ()
+-- postTweet :: OAuth -> Credential -> T.Text -> IO (Response)
 postTweet oauth cred tweet = do
     let params = [("status", TE.encodeUtf8 tweet)]
     req <- makeRequest statusesUrl params
-    resp <- executeOAuthRequest oauth cred req
-    putStrLn "Yo"
+    -- Error handling?
+    executeOAuthRequest oauth cred req
 
-makeRequest :: MonadThrow m => String -> [(ByteString, ByteString)] -> m Request
+-- makeRequest :: MonadThrow m => String -> [(ByteString, ByteString)] -> m Request
 makeRequest url params = do
     req <- parseUrl url
     return $ urlEncodedBody params req
 
 -- Arghhh, what's the type?!
--- executeOAuthRequest :: MonadThrow m => OAuth -> Credential -> m Request
+-- executeOAuthRequest :: MonadThrow m => OAuth -> Credential -> Request -> m (Response())
 executeOAuthRequest oauth cred request = do
-    liftIO $ withManager $ \manager -> do
+    withManager $ \manager -> do
         signed <- signOAuth oauth cred request
         http signed manager
+
+generateTweet :: (Ord a, RandomGen g) => g -> [a] -> [a]
+generateTweet rnd input =
+    take 140 $ MC.run 3 input 0 rnd
