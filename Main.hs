@@ -31,9 +31,10 @@ main = do
     rnd <- getStdGen
 
     input <- TI.getLine
-    let tweet = generateTweet rnd (T.unpack input)
-    putStrLn tweet
-    -- postTweet oauth cred "Hello, Horse"
+    let tweet = T.pack $ generateTweet rnd (T.unpack input)
+    -- That's ugly ...
+    _ <- postTweet oauth cred tweet
+    return ()
 
     where
         makeOAuth conf = do
