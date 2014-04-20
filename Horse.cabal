@@ -13,14 +13,23 @@ maintainer:          phartig@rdrei.net
 -- copyright:
 category:            Network
 build-type:          Simple
--- extra-source-files:
+extra-source-files:  README.markdown
 cabal-version:       >=1.10
 
 executable Horse
   main-is:             Main.hs
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >=4.6 && <4.7,
-                       configurator >= 0.2 && < 0.3
-  -- hs-source-dirs:
+  other-extensions:    OverloadedStrings, RecordWildCards
+  build-depends:       base >=4.7 && <4.8,
+                       authenticate-oauth >=1.4 && < 1.5,
+                       configurator >= 0.2 && < 0.3,
+                       text >= 1.1 && < 1.2,
+                       http-conduit >= 2.0 && < 2.1,
+                       bytestring >=0.10 && < 0.11,
+                       exception >= 0.5 && < 0.6
   default-language:    Haskell2010
+  Ghc-options:         -Wall
+                       -fwarn-tabs
+                       -fwarn-incomplete-record-updates
+                       -fwarn-monomorphism-restriction
+                       -fwarn-unused-do-bind
+                       -fwarn-implicit-prelude
