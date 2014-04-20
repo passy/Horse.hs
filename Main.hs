@@ -3,10 +3,12 @@ module Main where
 
 import Prelude
 
-import System.Environment (getArgs)
 import qualified Data.Configurator as Conf
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+
+import System.Environment (getArgs)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Catch (MonadThrow)
 import Data.ByteString (ByteString)
 import Network.HTTP.Conduit (parseUrl, withManager, http, urlEncodedBody,
@@ -44,9 +46,17 @@ postTweet :: OAuth -> Credential -> T.Text -> IO ()
 postTweet oauth cred tweet = do
     let params = [("status", TE.encodeUtf8 tweet)]
     req <- makeRequest statusesUrl params
+    resp <- executeOAuthRequest oauth cred req
     putStrLn "Yo"
 
 makeRequest :: MonadThrow m => String -> [(ByteString, ByteString)] -> m Request
 makeRequest url params = do
     req <- parseUrl url
     return $ urlEncodedBody params req
+
+-- Arghhh, what's the type?!
+-- executeOAuthRequest :: MonadThrow m => OAuth -> Credential -> m Request
+executeOAuthRequest oauth cred request = do
+    liftIO $ withManager $ \manager -> do
+        signed <- signOAuth oauth cred request
+        http signed manager
