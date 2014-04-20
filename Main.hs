@@ -71,4 +71,4 @@ executeOAuthRequest oauth cred request = do
 
 generateTweet :: (Ord a, RandomGen g) => g -> [a] -> [a]
 generateTweet rnd input =
-    take 140 $ MC.run 3 input 0 rnd
+    take 140 $ MC.run 4 input 0 rnd

@@ -3,9 +3,6 @@ Horse.hs
 
 Tweet like a Horse.
 
-*Note:* The output is really not as random as it should be and thus less funny.
-Working on it, but don't hold your breath.
-
 Development
 -----------
 
@@ -19,5 +16,5 @@ Running
 -------
 
 ```bash
-cat data/*.txt | cabal run horse.conf
+cat data/*.txt | tr -d '\n' | cabal run horse.conf
 ```
