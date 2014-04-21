@@ -11,13 +11,10 @@ import qualified Data.MarkovChain as MC
 
 import System.Random (RandomGen, getStdGen)
 import System.Environment (getArgs)
-import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Catch (MonadThrow)
 import Data.ByteString (ByteString)
-import Network.HTTP.Conduit (parseUrl, withManager, http, urlEncodedBody,
-                             Response(..), Request)
-import Web.Authenticate.OAuth (OAuth(..), Credential(..), newOAuth,
-                               newCredential, signOAuth)
+import Network.HTTP.Conduit (parseUrl, withManager, http, urlEncodedBody, Request)
+import Web.Authenticate.OAuth (OAuth(..), newOAuth, newCredential, signOAuth)
 
 statusesUrl :: String
 statusesUrl = "https://api.twitter.com/1.1/statuses/update.json"
@@ -57,7 +54,7 @@ postTweet oauth cred tweet = do
     -- Error handling?
     executeOAuthRequest oauth cred req
 
--- makeRequest :: MonadThrow m => String -> [(ByteString, ByteString)] -> m Request
+makeRequest :: MonadThrow m => String -> [(ByteString, ByteString)] -> m Request
 makeRequest url params = do
     req <- parseUrl url
     return $ urlEncodedBody params req
