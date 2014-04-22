@@ -6,7 +6,6 @@ import Prelude
 import qualified Data.Configurator as Conf
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
-import qualified Data.Text.IO as TI
 import qualified Data.MarkovChain as MC
 
 import System.Random (RandomGen, getStdGen)
@@ -21,7 +20,7 @@ import Web.Authenticate.OAuth (OAuth(..), Credential, newOAuth, newCredential, s
 statusesUrl :: String
 statusesUrl = "https://api.twitter.com/1.1/statuses/update.json"
 
-main :: IO ()
+main :: IO (Response (ResumableSource (ResourceT IO) ByteString))
 main = do
     [confFile] <- getArgs
     conf <- Conf.load [Conf.Required confFile]
@@ -29,11 +28,7 @@ main = do
     cred <- makeCredential conf
     rnd <- getStdGen
 
-    input <- TI.getLine
-    let tweet = T.pack $ generateTweet rnd (T.unpack input)
-    -- That's ugly ...
-    _ <- postTweet oauth cred tweet
-    return ()
+    postTweet oauth cred . T.pack . generateTweet rnd =<< getLine
 
     where
         makeOAuth conf = do
