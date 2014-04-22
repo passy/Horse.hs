@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Prelude
@@ -12,9 +12,11 @@ import qualified Data.MarkovChain as MC
 import System.Random (RandomGen, getStdGen)
 import System.Environment (getArgs)
 import Control.Monad.Catch (MonadThrow)
+import Control.Monad.Trans.Resource (ResourceT)
 import Data.ByteString (ByteString)
-import Network.HTTP.Conduit (parseUrl, withManager, http, urlEncodedBody, Request)
-import Web.Authenticate.OAuth (OAuth(..), newOAuth, newCredential, signOAuth)
+import Data.Conduit (ResumableSource)
+import Network.HTTP.Conduit (parseUrl, withManager, http, urlEncodedBody, Request, Response)
+import Web.Authenticate.OAuth (OAuth(..), Credential, newOAuth, newCredential, signOAuth)
 
 statusesUrl :: String
 statusesUrl = "https://api.twitter.com/1.1/statuses/update.json"
@@ -47,7 +49,7 @@ main = do
             return $ newCredential token secret
 
 
--- postTweet :: OAuth -> Credential -> T.Text -> IO (Response)
+postTweet :: OAuth -> Credential -> T.Text -> IO (Response (ResumableSource (ResourceT IO) ByteString))
 postTweet oauth cred tweet = do
     let params = [("status", TE.encodeUtf8 tweet)]
     req <- makeRequest statusesUrl params
@@ -59,9 +61,8 @@ makeRequest url params = do
     req <- parseUrl url
     return $ urlEncodedBody params req
 
--- Arghhh, what's the type?!
--- executeOAuthRequest :: MonadThrow m => OAuth -> Credential -> Request -> m (Response())
-executeOAuthRequest oauth cred request = do
+executeOAuthRequest :: OAuth -> Credential -> Request -> IO (Response (ResumableSource (ResourceT IO) ByteString))
+executeOAuthRequest oauth cred request =
     withManager $ \manager -> do
         signed <- signOAuth oauth cred request
         http signed manager
