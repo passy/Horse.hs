@@ -20,7 +20,7 @@ import Web.Authenticate.OAuth (OAuth(..), Credential, newOAuth, newCredential, s
 statusesUrl :: String
 statusesUrl = "https://api.twitter.com/1.1/statuses/update.json"
 
-main :: IO (Response (ResumableSource (ResourceT IO) ByteString))
+main :: IO ()
 main = do
     [confFile] <- getArgs
     conf <- Conf.load [Conf.Required confFile]
@@ -28,7 +28,8 @@ main = do
     cred <- makeCredential conf
     rnd <- getStdGen
 
-    postTweet oauth cred . T.pack . generateTweet rnd =<< getLine
+    _ <- postTweet oauth cred . T.pack . generateTweet rnd =<< getLine
+    return ()
 
     where
         makeOAuth conf = do
