@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 
 executable Horse
   main-is:             Main.hs
-  other-extensions:    OverloadedStrings, RecordWildCards
+  other-extensions:    OverloadedStrings
   build-depends:       base >=4.7 && <4.8,
                        authenticate-oauth >=1.4 && < 1.5,
                        bytestring >=0.10 && < 0.11,
